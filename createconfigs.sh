@@ -3,7 +3,7 @@ set -eux
 
 VERSION=$1
 EXTRA_CONNECTORS="${2:+$2,}"
-nodes=$(curl -L http://headnodehost:8088/ws/v1/cluster/nodes |  grep -o '"nodeHostName":"[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*"'  | wc -l)
+nodes=$(curl -L http://headnodehost:8088/ws/v1/cluster/nodes |  grep -o '"nodeHostName":'  | wc -l)
 
 metastore=$(grep -n1 "hive.metastore.uri" /etc/hive/conf/hive-site.xml | grep -o "<value>.*/value>" | sed 's:<value>::g' | sed 's:</value>::g')
 memory=$(grep -n1 "yarn.nodemanager.resource.memory-mb" /etc/hadoop/conf/yarn-site.xml | grep -o "<value>.*/value>" | sed 's:<value>::g' | sed 's:</value>::g')
@@ -21,7 +21,8 @@ cat > appConfig-default.json <<EOF
     "site.global.singlenode": "false",
     "site.global.coordinator_host": "\${COORDINATOR_HOST}",
     "site.global.presto_query_max_memory": "$(($(($(($memory/1706))-1)) * $(($nodes-2))))GB",
-    "site.global.presto_query_max_memory_per_node": "$(($(($memory/1706))-1))GB",
+    "site.global.presto_query_max_memory_per_node":  "$(($(($memory/2048))-2))GB",
+    "site.global.presto_query_max_total_memory_per_node":  "$(($(($memory/2048))-2))GB",
     "site.global.presto_server_port": "9090",
     "site.global.catalog": "{ $EXTRA_CONNECTORS 'hive': ['connector.name=hive-hadoop2','hive.metastore.uri=$metastore', 'hive.config.resources=/etc/hadoop/conf/hdfs-site.xml,/etc/hadoop/conf/core-site.xml'], 'tpch': ['connector.name=tpch']}",
     "site.global.jvm_args": "['-server', '-Xmx$(($(($memory/1024))-1))G', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",

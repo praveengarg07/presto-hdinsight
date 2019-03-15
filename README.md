@@ -4,7 +4,7 @@ Run Presto on Azure HDInsight
 # TL;DR 
 Run a custom [Script Action](https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-hadoop-customize-cluster-linux) on existing or new HDInsight _hadoop_ cluster (version 3.5 or above) with following as your bash script URI and run it on "HEAD" and "WORKER":
 ```
-https://raw.githubusercontent.com/dharmeshkakadia/presto-hdinsight/master/installpresto.sh
+https://raw.githubusercontent.com/hdinsight/presto-hdinsight/master/installpresto.sh
 ```
 
 Now you can SSH to your cluster and start using presto:
@@ -16,7 +16,6 @@ This will connect to hive metastore via [hive connector](https://prestodb.io/doc
 If you want to configure additional connectors, you can pass the catalog configurations as a parameter to the custom action script. The syntax is `‘connector1’ : [‘key1=value1’, ‘key2=value2’..], ‘connector2’ : [‘key1=value1’, ‘key2=value2’..]` as described in [presto-yarn](https://prestodb.io/presto-yarn/installation-yarn-configuration-options.html). So, the following string as a parameter will add sqlserver and DocDB connectors with its configurations (notice the "" around the full string):
 
 > " 'cosmosdb': ['connector.name=mongodb','mongodb.seeds=test.documents.azure.com:10255','mongodb.credentials=testuser:secretpassword@prestocollection','mongodb.ssl.enabled=true'],'sqlserver': ['connector.name=sqlserver','connection-url=jdbc:sqlserver://testsqlserver.database.windows.net:1433;database=testdb;user=testuser@testserver;password=secretpassword;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;', 'connection-user=testuser','connection-password=secretpassword'] "
-
 
 # Airpal
 To optionally install [airpal](https://github.com/airbnb/airpal), 
@@ -35,7 +34,7 @@ To optionally install [airpal](https://github.com/airbnb/airpal),
       }
     ```
 
-2. Click [here](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdharmeshkakadia%2Fpresto-hdinsight%2Fmaster%2Fairpal-deploy.json) the below link to add an edge node to the cluster where airpal is going to be installed. Provide Clustername, EdgeNodeSize and PrestoAddress (noted above). 
+2. Click [here](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fhdinsight%2Fpresto-hdinsight%2Fmaster%2Fairpal-deploy.json) the below link to add an edge node to the cluster where airpal is going to be installed. Provide Clustername, EdgeNodeSize and PrestoAddress (noted above). 
 
 To access the airpal, go to azure portal, your cluster and navigate to Applications and click on portal. You have to login with cluster login credentials.
 
@@ -53,32 +52,19 @@ You can check the script action logs in your default storage account under <STOR
 Yes.
 
 ### Does it work with [Azure Data Lake Store (ADLS)](https://azure.microsoft.com/en-us/services/data-lake-store/)?
-Yes. Following are the instructions if the cluster is already running:
+Yes. Following are the instrcutions :
 1. Go to Ambari -> HDFS -> Configs -> Advanced -> Custom core-site. 
-2. Click on "Add Property" to add following properties to core-site. The details of this configuration can be found [here](https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html):
+2. Click on "Add Property" to add following proerties to core-site. The details of this configuration can be found [here](https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html):
 
-   2a. For HDInsight 3.5:
- 
         fs.adl.impl=org.apache.hadoop.fs.adl.AdlFileSystem
         fs.AbstractFileSystem.adl.impl=org.apache.hadoop.fs.adl.Adl
         dfs.adls.oauth2.access.token.provider.type=ClientCredential
         dfs.adls.oauth2.refresh.url=https://login.microsoftonline.com/YOUR_AZURE_AD_TENANT_ID/oauth2/token
         dfs.adls.oauth2.client.id=YOUR_AZURE_SERVICE_PRINCIPAL_ID
         dfs.adls.oauth2.credential=YOUR_AZURE_SERVICE_PRINCIPAL_PASSWORD
-        
-   2b. For HDInsight 3.6 add any which don't already exist:
-
-        fs.adl.impl=org.apache.hadoop.fs.adl.HdiAdlFileSystem
-        fs.AbstractFileSystem.adl.impl=org.apache.hadoop.fs.adl.HdiAdl
-        dfs.adls.oauth2.access.token.provider.type=ClientCredential
-        dfs.adls.oauth2.refresh.url=https://login.microsoftonline.com/YOUR_AZURE_AD_TENANT_ID/oauth2/token
-        dfs.adls.oauth2.client.id=YOUR_AZURE_SERVICE_PRINCIPAL_ID
-        dfs.adls.oauth2.credential=YOUR_AZURE_SERVICE_PRINCIPAL_PASSWORD
 
 3. Restart the required services by going to Ambari -> Actions -> "Restart All Required"
-4. Now run the presto script action from the Azure portal.
-
-Alternately, if you are creating a cluster from an ARM template, you can add these properties into the core-site section of the ARM template so that no manual steps will be required after cluster creation.
+4. Now run the presto script action from the azure portal.
 
 ### How do I customize presto installation?
 If you want to customize presto (change the memory settings, change connectors etc.), 
@@ -104,5 +90,5 @@ If you want to customize presto (change the memory settings, change connectors e
     ```
 
 ### How do I run TPCDS on presto?
-    Follow https://github.com/dharmeshkakadia/tpcds-datagen-as-hive-query/blob/master/README.md#how-do-i-run-the-queries-with-presto
+Follow the instructions on [HDInsight-TPCDS](https://github.com/hdinsight/tpcds-datagen-as-hive-query/blob/master/README.md#how-do-i-run-the-queries-with-presto) repo.
     
